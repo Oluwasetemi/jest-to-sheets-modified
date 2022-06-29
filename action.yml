@@ -10,6 +10,12 @@ inputs:
   server:  
     description: 'base API URL'
     required: true
+  sheetid:  
+    description: 'the ID of the Google spreadsheet'
+    required: true
+  token:  
+    description: 'Auth token for the API call'
+    required: true
 runs:
   using: 'node16'
   main: 'dist/index.js'
