@@ -72,12 +72,15 @@ const ownerToSheetPartition = (owner) => {
 
 const reportATask = async (language, task, opts) => {
     const stats = getStatsFor(language, task);
-
     const challenge = tastToChallengeName(task);
     const { token, server, sheetid } = opts;
 
+    console.log('reportATask', task);
+
     const { repo, owner } = context.repo;
+    console.log('reportATask', owner, repo);
     const sheet = ownerToSheetPartition(owner);
+    console.log('reportATask', sheet);
 
     const data = {
         repo,
@@ -88,27 +91,29 @@ const reportATask = async (language, task, opts) => {
         source: 'gha-jest-tests'
     };
 
-    const apiHeaders = {
-        "X-Spreadsheet-Id": `${sheetid}`,
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-    };
+    console.log('reportATask', data);
 
-    const { data: existing } = await axios.get(`${server}/${sheet}`, {
-        headers: apiHeaders
-    });
+    // const apiHeaders = {
+    //     "X-Spreadsheet-Id": `${sheetid}`,
+    //     "Authorization": `Bearer ${token}`,
+    //     "Content-Type": "application/json"
+    // };
 
-    const found = existing.results.find((e) => e.owner === owner && e.task === challenge);
-    if (found) {
-        // update the record and exit this function
-        return await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
-            headers: apiHeaders
-        });
-    }
+    // const { data: existing } = await axios.get(`${server}/${sheet}`, {
+    //     headers: apiHeaders
+    // });
+
+    // const found = existing.results.find((e) => e.owner === owner && e.task === challenge);
+    // if (found) {
+    //     // update the record and exit this function
+    //     return await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
+    //         headers: apiHeaders
+    //     });
+    // }
     
-    await axios.post(`${server}/${sheet}`, data, {
-        headers: apiHeaders
-    });
+    // await axios.post(`${server}/${sheet}`, data, {
+    //     headers: apiHeaders
+    // });
 };
 
 const run = async () => {
@@ -118,24 +123,15 @@ const run = async () => {
     const server = core.getInput('server');
     const sheetid = core.getInput('sheetid');
 
-    console.log(token);
-    console.log(language);
-    console.log(server);
-    console.log(sheetid);
+    const allTasks = core.getInput('challenge').split(/;\s*/);
 
-    // const allTasks = core.getInput('challenge').split(/:\s*/);
+    const reportingStack = allTasks.reduce(async (previous, task) => {
+        return previous.then(
+            () => reportATask(language, task, { token, server, sheetid })
+        );
+    }, Promise.resolve());
 
-    // const reportingStack = allTasks.reduce(async (previous, task) => {
-    //     return previous.then(
-    //         () => reportATask(language, task, {
-    //             token,
-    //             server,
-    //             sheetid
-    //         })
-    //     );
-    // }, Promise.resolve());
-
-    // await reportingStack;
+    await reportingStack;
   } catch (error) {
     core.setFailed(error.message);
   }
