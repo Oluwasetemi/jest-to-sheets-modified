@@ -118,19 +118,24 @@ const run = async () => {
     const server = core.getInput('server');
     const sheetid = core.getInput('sheetid');
 
-    const allTasks = core.getInput('challenge').split(/;\s*/);
+    console.log(token);
+    console.log(language);
+    console.log(server);
+    console.log(sheetid);
 
-    const reportingStack = allTasks.reduce(async (previous, task) => {
-        return previous.then(
-            () => reportATask(language, task, {
-                token,
-                server,
-                sheetid
-            })
-        );
-    }, Promise.resolve());
+    // const allTasks = core.getInput('challenge').split(/;\s*/);
 
-    await reportingStack;
+    // const reportingStack = allTasks.reduce(async (previous, task) => {
+    //     return previous.then(
+    //         () => reportATask(language, task, {
+    //             token,
+    //             server,
+    //             sheetid
+    //         })
+    //     );
+    // }, Promise.resolve());
+
+    // await reportingStack;
   } catch (error) {
     core.setFailed(error.message);
   }
