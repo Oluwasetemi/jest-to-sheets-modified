@@ -72,24 +72,42 @@ const ownerToSheetPartition = (owner) => {
 
 const reportATask = async (language, task, opts) => {
     const stats = getStatsFor(language, task);
+
+    const challenge = tastToChallengeName(task);
     const { token, server, sheetid } = opts;
 
     const { repo, owner } = context.repo;
+    const sheet = ownerToSheetPartition(owner);
+
     const data = {
-      repo,
-      owner,
-      ...stats,
-      language,
-      source: 'gha-jest-tests',
-      type: tastToChallengeName(task)
+        repo,
+        owner,
+        ...stats,
+        language,
+        task: challenge,
+        source: 'gha-jest-tests'
     };
 
-    const sheet = ownerToSheetPartition(owner);
+    const apiHeaders = {
+        "X-Spreadsheet-Id": `${sheetid}`,
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    };
+
+    const { data: existing } = await axios.get(`${server}/${sheet}`, {
+        headers: apiHeaders
+    });
+
+    const found = existing.results.find((e) => e.owner === owner && e.task === challenge);
+    if (found) {
+        // update the record and exit this function
+        return await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
+            headers: apiHeaders
+        });
+    }
+    
     await axios.post(`${server}/${sheet}`, data, {
-        headers: {
-            "X-Spreadsheet-Id": `${sheetid}`,
-            "Authorization": `Bearer ${token}`
-        }
+        headers: apiHeaders
     });
 };
 
