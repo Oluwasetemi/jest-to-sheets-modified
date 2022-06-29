@@ -6,14 +6,16 @@ const axios = require('axios');
 const fileExists = async path => !!(await fs.promises.stat(path).catch(e => false));
 
 const getStatsFor = async (lang, task) => {
-  const report = `${process.cwd()}/audits/${task}.json`;
+  const report = `${process.cwd()}/audits/${task}/${task}.json`;
   const reportExists = await fileExists(report);
+
+  console.log(`/audits/${task}/${task}.json exists:`, reportExists);
 
   if (reportExists === true) {
     let stats = {};
 
     if (lang === 'javascript' || lang === 'python') {
-        const json = fs.readFileSync(`${process.cwd()}/audits/${task}.json`, 'utf8');
+        const json = fs.readFileSync(`${process.cwd()}/audits/${task}/${task}.json`, 'utf8');
         const payload = JSON.parse(json);
     
         stats.tests = payload.numTotalTests;
@@ -76,6 +78,7 @@ const reportATask = async (language, task, opts) => {
     const { token, server, sheetid } = opts;
 
     console.log('reportATask', task);
+    console.log('reportATask', stats);
 
     const { repo, owner } = context.repo;
     console.log('reportATask', owner, repo);
