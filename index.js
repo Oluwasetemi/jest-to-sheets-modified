@@ -1,7 +1,7 @@
 const fs = require('fs').promises;
-const axios = require('axios');
 const core = require('@actions/core');
 const { context } = require('@actions/github');
+const axios = require('axios');
 
 const fileExists = async path => !!(await fs.promises.stat(path).catch(e => false));
 
@@ -123,7 +123,7 @@ const run = async () => {
     console.log(server);
     console.log(sheetid);
 
-    // const allTasks = core.getInput('challenge').split(/;\s*/);
+    // const allTasks = core.getInput('challenge').split(/:\s*/);
 
     // const reportingStack = allTasks.reduce(async (previous, task) => {
     //     return previous.then(
