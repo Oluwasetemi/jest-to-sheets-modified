@@ -1,0 +1,15 @@
+name: 'Report Jest Audit'
+description: 'report jest test stats for one or more coding challenges'
+inputs:
+  challenge:
+    description: 'the comma separated list of challenges or tasks to report on'
+    required: true
+  lang:
+    description: 'the programming language in use'
+    required: true
+  server:  
+    description: 'base API URL'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
