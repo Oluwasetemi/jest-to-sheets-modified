@@ -5,11 +5,8 @@ const { context } = require('@actions/github');
 const axios = require('axios');
 
 const getStatsFor = async (lang, task) => {
-  const report = `${process.cwd()}/audits/${task}/${task}.json`;
-  console.log(`/audits/${task}/${task}.json`);
-  const reportExists = await fileExists(report);
-
-  console.log(`report exists:`, reportExists);
+  const file = `${process.cwd()}/audits/${task}/${task}.json`;
+  const reportExists = await fileExists(file);
 
   if (reportExists === true) {
     let stats = {};
@@ -17,11 +14,12 @@ const getStatsFor = async (lang, task) => {
     if (lang === 'javascript' || lang === 'python') {
         const rawData = await fs.readFile(`${process.cwd()}/audits/${task}/${task}.json`, 'utf8');
         const payload = JSON.parse(rawData);
+        const { numTotalTests, numPassedTests, numPendingTests} = payload;
 
-        console.log(payload);
+        console.log('total: %i, pending: %i, passed: %i', numTotalTests, numPendingTests, numPassedTests);
     
-        stats.tests = payload.numTotalTests;
-        stats.passed = payload.numPassedTests;
+        stats.passed = numPassedTests;
+        stats.tests = numTotalTests - numPendingTests;
       }
     
       if (lang === 'php') {
@@ -83,9 +81,11 @@ const reportATask = async (language, task, opts) => {
     console.log('reportATask', stats);
 
     const { repo, owner } = context.repo;
-    console.log('reportATask', owner, repo);
     const sheet = ownerToSheetPartition(owner);
-    console.log('reportATask', sheet);
+    console.log('reportATask', owner, repo, sheet);
+
+    // dont send data for skipped tests
+    if (stats.tests <= 0) return;
 
     const data = {
         repo,
