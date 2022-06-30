@@ -15,8 +15,6 @@ const getStatsFor = async (lang, task) => {
         const rawData = await fs.readFile(`${process.cwd()}/audits/${task}/${task}.json`, 'utf8');
         const payload = JSON.parse(rawData);
         const { numTotalTests, numPassedTests, numPendingTests} = payload;
-
-        console.log('total: %i, pending: %i, passed: %i', numTotalTests, numPendingTests, numPassedTests);
     
         stats.passed = numPassedTests;
         stats.tests = numTotalTests - numPendingTests;
@@ -77,9 +75,6 @@ const reportATask = async (language, task, opts) => {
     const { token, server, sheetid } = opts;
     const stats = await getStatsFor(language, task);
 
-    console.log('reportATask', task);
-    console.log('reportATask', stats);
-
     const { repo, owner } = context.repo;
     const sheet = ownerToSheetPartition(owner);
     console.log('reportATask', owner, repo, sheet);
@@ -98,27 +93,30 @@ const reportATask = async (language, task, opts) => {
 
     console.log('reportATask', data);
 
-    // const apiHeaders = {
-    //     "X-Spreadsheet-Id": `${sheetid}`,
-    //     "Authorization": `Bearer ${token}`,
-    //     "Content-Type": "application/json"
-    // };
+    const apiHeaders = {
+        "X-Spreadsheet-Id": `${sheetid}`,
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    };
 
-    // const { data: existing } = await axios.get(`${server}/${sheet}`, {
-    //     headers: apiHeaders
-    // });
+    const { data: existing } = await axios.get(`${server}/${sheet}`, {
+        headers: apiHeaders
+    });
 
-    // const found = existing.results.find((e) => e.owner === owner && e.task === challenge);
-    // if (found) {
-    //     // update the record and exit this function
-    //     return await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
-    //         headers: apiHeaders
-    //     });
-    // }
+    console.log('existing: ', existing);
+
+    const found = existing.results.find((e) => e.owner === owner && e.task === challenge);
+    console.log('found: ', found);
+    if (found) {
+        // update the record and exit this function
+        return await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
+            headers: apiHeaders
+        });
+    }
     
-    // await axios.post(`${server}/${sheet}`, data, {
-    //     headers: apiHeaders
-    // });
+    await axios.post(`${server}/${sheet}`, data, {
+        headers: apiHeaders
+    });
 };
 
 const run = async () => {
