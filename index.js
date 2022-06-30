@@ -1,9 +1,8 @@
 const fs = require('fs').promises;
+const fileExists = require('fs.promises.exists');
 const core = require('@actions/core');
 const { context } = require('@actions/github');
 const axios = require('axios');
-
-const fileExists = async path => !!(await fs.promises.stat(path).catch(e => false));
 
 const getStatsFor = async (lang, task) => {
   const report = `${process.cwd()}/audits/${task}/${task}.json`;
@@ -15,8 +14,10 @@ const getStatsFor = async (lang, task) => {
     let stats = {};
 
     if (lang === 'javascript' || lang === 'python') {
-        const json = fs.readFileSync(`${process.cwd()}/audits/${task}/${task}.json`, 'utf8');
-        const payload = JSON.parse(json);
+        const rawData = await fs.readFile(`${process.cwd()}/audits/${task}/${task}.json`, 'utf8');
+        const payload = JSON.parse(rawData);
+
+        console.log(payload);
     
         stats.tests = payload.numTotalTests;
         stats.passed = payload.numPassedTests;
