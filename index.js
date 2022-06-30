@@ -6,9 +6,10 @@ const axios = require('axios');
 
 const getStatsFor = async (lang, task) => {
   const report = `${process.cwd()}/audits/${task}/${task}.json`;
+  console.log(`/audits/${task}/${task}.json`);
   const reportExists = await fileExists(report);
 
-  console.log(`/audits/${task}/${task}.json exists:`, reportExists);
+  console.log(`report exists:`, reportExists);
 
   if (reportExists === true) {
     let stats = {};
