@@ -77,7 +77,6 @@ const reportATask = async (language, task, opts) => {
 
     const { repo, owner } = context.repo;
     const sheet = ownerToSheetPartition(owner);
-    console.log('reportATask', owner, repo, sheet);
 
     // dont send data for skipped tests
     if (stats.tests <= 0) return;
@@ -92,23 +91,20 @@ const reportATask = async (language, task, opts) => {
         since: (new Date()).toUTCString()
     };
 
-    console.log('reportATask', data);
-
     const apiHeaders = {
         "X-Spreadsheet-Id": `${sheetid}`,
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
     };
 
-    const { data: existing } = await axios.get(`${server}/${sheet}`, {
+    const { data: existing } = await axios.get(`${server}/${sheet}?where={'repo':'${repo}'}`, {
         headers: apiHeaders
     });
 
-    const found = existing.results.find((e) => e.owner === owner && e.task === challenge);
-    console.log('found: ', found);
+    const found = existing.results.find((e) => e.repo === repo && e.task === challenge);
     if (found) {
         // update the record and exit this function
-        data.attempts = found.attempts + 1;
+        data.attempts = parseInt(found.attempts, 10) + 1;
         await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
             headers: apiHeaders
         });
