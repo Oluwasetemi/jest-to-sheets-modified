@@ -73,9 +73,9 @@ const ownerToSheetPartition = (owner) => {
 };
 
 const reportATask = async (language, task, opts) => {
-    const stats = getStatsFor(language, task);
     const challenge = tastToChallengeName(task);
     const { token, server, sheetid } = opts;
+    const stats = await getStatsFor(language, task);
 
     console.log('reportATask', task);
     console.log('reportATask', stats);
@@ -128,13 +128,12 @@ const run = async () => {
 
     const allTasks = core.getInput('challenge').split(/;\s*/);
 
-    const reportingStack = allTasks.reduce(async (previous, task) => {
+    await allTasks.reduce(async (previous, task) => {
         return previous.then(
             () => reportATask(language, task, { token, server, sheetid })
         );
     }, Promise.resolve());
 
-    await reportingStack;
   } catch (error) {
     core.setFailed(error.message);
   }
