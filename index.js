@@ -88,7 +88,8 @@ const reportATask = async (language, task, opts) => {
         ...stats,
         language,
         task: challenge,
-        source: 'gha-jest-tests'
+        source: 'gha-jest-tests',
+        since: (new Date()).toUTCString()
     };
 
     console.log('reportATask', data);
@@ -103,17 +104,18 @@ const reportATask = async (language, task, opts) => {
         headers: apiHeaders
     });
 
-    console.log('existing: ', existing);
-
     const found = existing.results.find((e) => e.owner === owner && e.task === challenge);
     console.log('found: ', found);
     if (found) {
         // update the record and exit this function
-        return await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
+        data.attempts = found.attempts + 1;
+        await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
             headers: apiHeaders
         });
+        return;
     }
     
+    data.attempts = 1;
     await axios.post(`${server}/${sheet}`, data, {
         headers: apiHeaders
     });
