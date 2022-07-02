@@ -4,6 +4,8 @@ const core = require('@actions/core');
 const { context } = require('@actions/github');
 const axios = require('axios');
 
+let countAllTests = 0;
+
 const getStatsFor = async (lang, task) => {
   const file = `${process.cwd()}/audits/${task}/${task}.json`;
   const reportExists = await fileExists(file);
@@ -79,6 +81,7 @@ const reportATask = async (language, task, opts) => {
     const sheet = ownerToSheetPartition(owner);
 
     // dont send data for skipped tests
+    countAllTests += stats.tests;
     if (stats.tests <= 0) return;
 
     const data = {
@@ -131,6 +134,18 @@ const run = async () => {
             () => reportATask(language, task, { token, server, sheetid })
         );
     }, Promise.resolve());
+
+    console.log(context.repo);
+    console.log(context);
+
+    // Flag it if no tests ran at all
+    if (countAllTests === 0) {
+      core.warning('+================================+');
+      core.warning('All tests were skipped! Unless you are window shopping here, you\'ve not given us the chance to review what you\'ve got. Kindly review the instructions carefully');
+      core.warning('+================================+');
+
+      core.setFailed('All tests were skipped! Unless you are window shopping here, please review the instructions carefully');
+    }
 
   } catch (error) {
     core.setFailed(error.message);
