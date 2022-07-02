@@ -135,8 +135,7 @@ const run = async () => {
         );
     }, Promise.resolve());
 
-    const { email } = context.payload;
-    console.log(email);
+    console.log(context.payload.pusher.email);
     console.log(context);
 
     // Flag it if no tests ran at all
