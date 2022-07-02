@@ -78,6 +78,7 @@ const reportATask = async (language, task, opts) => {
     const stats = await getStatsFor(language, task);
 
     const { repo, owner } = context.repo;
+    const { repository, pusher } = context.payload;
     const sheet = ownerToSheetPartition(owner);
 
     // dont send data for skipped tests
@@ -90,8 +91,10 @@ const reportATask = async (language, task, opts) => {
         ...stats,
         language,
         task: challenge,
+        url: repository.url,
         source: 'gha-jest-tests',
-        since: (new Date()).toUTCString()
+        since: (new Date()).toUTCString(),
+        email: repository.owner.email || pusher.email
     };
 
     const apiHeaders = {
@@ -134,11 +137,6 @@ const run = async () => {
             () => reportATask(language, task, { token, server, sheetid })
         );
     }, Promise.resolve());
-
-    console.log(context.payload.pusher.email);
-    console.log(context.payload.repository.url);
-    console.log(context.payload.repository.owner);
-    console.log(context);
 
     // Flag it if no tests ran at all
     if (countAllTests === 0) {
