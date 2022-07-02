@@ -135,16 +135,14 @@ const run = async () => {
         );
     }, Promise.resolve());
 
-    console.log(context.repo);
+    const { email } = context.payload;
+    console.log(email);
     console.log(context);
 
     // Flag it if no tests ran at all
     if (countAllTests === 0) {
-      core.warning('+================================+');
-      core.warning('All tests were skipped! Unless you are window shopping here, you\'ve not given us the chance to review what you\'ve got. Kindly review the instructions carefully');
-      core.warning('+================================+');
-
-      core.setFailed('All tests were skipped! Unless you are window shopping here, please review the instructions carefully');
+      core.warning('Unless you are window shopping here, please review the instructions carefully');
+      core.setFailed('All tests were skipped!!');
     }
 
   } catch (error) {
