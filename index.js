@@ -65,6 +65,7 @@ const ownerToSheetPartition = (owner) => {
     if (index === -1) index = 25;
 
     const key = Object.keys(shards).find(k => {
+        console.log('key', k)
         const [start, end] = k.split('-');
         return index >= parseInt(start, 10) && index <= parseInt(end, 10);
     });
@@ -78,6 +79,7 @@ const reportATask = async (language, task, opts) => {
     const stats = await getStatsFor(language, task);
 
     const { repo, owner } = context.repo;
+    console.log('Repo and owner', repo, owner)
     const { repository, pusher } = context.payload;
     console.log('here')
     const sheet = ownerToSheetPartition(owner);
