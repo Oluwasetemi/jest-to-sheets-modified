@@ -104,6 +104,7 @@ const reportATask = async (language, task, opts) => {
         "Content-Type": "application/json"
     };
 
+    console.log(sheet)
     const { data: existing } = await axios.get(`${server}/${sheet}?where={'repo':'${repo}'}`, {
         headers: apiHeaders
     });
