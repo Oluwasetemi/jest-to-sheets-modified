@@ -111,8 +111,8 @@ const reportATask = async (language, task, opts) => {
         headers: apiHeaders
     });
 
-    console.log('Existing data', existing?.results)
-    const found = existing?.results?.find((e) => e.repo === repo && e.task === challenge);
+    console.log('Existing data', existing && existing.results && existing.results.length > 0 &&  existing.results)
+    const found = exiting && existing.results && existing.results.length > 0 && existing.results.find((e) => e.repo === repo && e.task === challenge);
     if (found) {
         // update the record and exit this function
         data.attempts = parseInt(found.attempts, 10) + 1;
