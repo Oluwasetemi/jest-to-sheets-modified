@@ -104,13 +104,13 @@ const reportATask = async (language, task, opts) => {
         "Content-Type": "application/json"
     };
 
-    console.log(sheet)
+    console.log('what is the sheet',sheet)
     const { data: existing } = await axios.get(`${server}/${sheet}?where={'repo':'${repo}'}`, {
         headers: apiHeaders
     });
 
-    console.log('Existing data', existing.results)
-    const found = existing.results.find((e) => e.repo === repo && e.task === challenge);
+    console.log('Existing data', existing?.results)
+    const found = existing?.results?.find((e) => e.repo === repo && e.task === challenge);
     if (found) {
         // update the record and exit this function
         data.attempts = parseInt(found.attempts, 10) + 1;
