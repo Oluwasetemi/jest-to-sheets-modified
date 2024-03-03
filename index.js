@@ -17,18 +17,18 @@ const getStatsFor = async (lang, task) => {
         const rawData = await fs.readFile(`${process.cwd()}/audits/${task}/${task}.json`, 'utf8');
         const payload = JSON.parse(rawData);
         const { numTotalTests, numPassedTests, numPendingTests} = payload;
-    
+
         stats.passed = numPassedTests;
         stats.tests = numTotalTests - numPendingTests;
       }
-    
+
       if (lang === 'php') {
         // TODO install xml2json and read test output in xml
-        // before converting to json 
-    
+        // before converting to json
+
         // const xml = fs.readFileSync(`${process.cwd()}/audits/${task}.xml`, 'utf8');
         // const data = xml2json.toJson(xml, { object: true });
-    
+
         // const payload = data.testsuites.testsuite;
         // stats.totalTests = payload.tests;
         // stats.passedTests = parseInt(payload.tests, 10) - parseInt(payload.failures, 10);
@@ -41,7 +41,7 @@ const getStatsFor = async (lang, task) => {
     tests: 0,
     passed: 0
   };
-  
+
 };
 
 const tastToChallengeName = (t) => {
@@ -79,6 +79,7 @@ const reportATask = async (language, task, opts) => {
 
     const { repo, owner } = context.repo;
     const { repository, pusher } = context.payload;
+    console.log('here')
     const sheet = ownerToSheetPartition(owner);
 
     // dont send data for skipped tests
@@ -107,6 +108,7 @@ const reportATask = async (language, task, opts) => {
         headers: apiHeaders
     });
 
+    console.log('Existing data', existing.results)
     const found = existing.results.find((e) => e.repo === repo && e.task === challenge);
     if (found) {
         // update the record and exit this function
@@ -116,8 +118,9 @@ const reportATask = async (language, task, opts) => {
         });
         return;
     }
-    
+
     data.attempts = 1;
+    console.log('Sending data to sheets', data);
     await axios.post(`${server}/${sheet}`, data, {
         headers: apiHeaders
     });
