@@ -111,9 +111,7 @@ const reportATask = async (language, task, opts) => {
     data: { name },
   } = await axios.get(`https://api.github.com/users/${owner}`);
 
-  console.log('Repo and owner and name', repo, owner, name);
   const { repository, pusher } = context.payload;
-  console.log('here');
   const sheet = ownerToSheetPartition(owner);
 
   // dont send data for skipped tests
@@ -139,7 +137,6 @@ const reportATask = async (language, task, opts) => {
     'Content-Type': 'application/json',
   };
 
-  console.log('what is the sheet', sheet);
   const { data: existing } = await axios.get(
     `${server}/${sheet}?where={'repo':'${repo}'}`,
     {
@@ -160,7 +157,6 @@ const reportATask = async (language, task, opts) => {
   }
 
   data.attempts = 1;
-  console.log('Sending data to sheets', data);
   await axios.post(`${server}/${sheet}`, data, {
     headers: apiHeaders,
   });
