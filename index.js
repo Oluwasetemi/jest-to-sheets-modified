@@ -105,7 +105,12 @@ const reportATask = async (language, task, opts) => {
   const { token, server, sheetid } = opts;
   const stats = await getStatsFor(language, task);
 
-  const { repo, owner } = context.repo;
+  let { repo, owner } = context.repo;
+
+  /* support for GitHub classroom repos */
+  if (repo.startsWith('javascript-basics')) {
+    owner = repo.split('-')[2];
+  }
 
   const {
     data: { name },
