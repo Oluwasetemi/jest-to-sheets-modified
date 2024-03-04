@@ -1,8 +1,8 @@
-const fs = require('fs').promises;
-const fileExists = require('fs.promises.exists');
-const core = require('@actions/core');
-const { context } = require('@actions/github');
-const axios = require('axios');
+import * as core from '@actions/core';
+import { context } from '@actions/github';
+import axios from 'axios';
+import fileExists from 'fs.promises.exists';
+import fs from 'node:fs/promises';
 
 let countAllTests = 0;
 
@@ -50,6 +50,7 @@ const tastToChallengeName = (t) => {
 };
 
 const alphabets = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
 const shards = {
     '0-4': 'A-E',
     '5-9': 'F-J',
@@ -57,6 +58,8 @@ const shards = {
     '15-19': 'P-T',
     '20-25': 'U-Z'
 };
+
+
 
 const ownerToSheetPartition = (owner) => {
     const initial = owner.charAt(0).toLowerCase();
@@ -111,8 +114,7 @@ const reportATask = async (language, task, opts) => {
         headers: apiHeaders
     });
 
-    console.log('Existing data', existing && existing.results && existing.results.length > 0 &&  existing.results)
-    const found = exiting && existing.results && existing.results.length > 0 && existing.results.find((e) => e.repo === repo && e.task === challenge);
+    const found = existing?.results?.find((e) => e.repo === repo && e.task === challenge);
     if (found) {
         // update the record and exit this function
         data.attempts = parseInt(found.attempts, 10) + 1;
