@@ -1,4 +1,4 @@
-# jest-to-sheets
+# jest-to-sheets-modified
 
 This action sends the Jest tests summary to a backend Google sheet via an API
 
@@ -20,10 +20,9 @@ This action sends the Jest tests summary to a backend Google sheet via an API
 
 ```bash
 - name: Report Tests
-  uses: exam-01-practice/jest-to-sheets@v1
+  uses: Oluwasetemi/jest-to-sheets-modified@v1
   with:
     challenge: ch-2
     lang: javascript
     server: https://the-server-url/endpoint
 ```
-
