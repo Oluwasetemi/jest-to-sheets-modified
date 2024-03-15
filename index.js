@@ -109,12 +109,17 @@ const reportATask = async (language, task, opts) => {
 
   /* support for GitHub classroom repos */
   if (repo.startsWith('javascript-basics')) {
-    owner = repo.split('-')[2];
+    const splitted = repo.split('-');
+
+    if (splitted.length === 3) {
+      owner = splitted[2];
+    } else {
+      // remove the first two words from splitted
+      const [, , ...rest] = splitted;
+      owner = rest.join('-');
+    }
   }
 
-  const {
-    data: { name },
-  } = await axios.get(`https://api.github.com/users/${owner}`);
 
   const { repository, pusher } = context.payload;
   const sheet = ownerToSheetPartition(owner);
@@ -123,6 +128,10 @@ const reportATask = async (language, task, opts) => {
   countAllTests += stats.tests;
   if (stats.tests <= 0) return;
 
+  const {
+    data: { name },
+  } = await axios.get(`https://api.github.com/users/${owner}`);
+  
   const data = {
     name,
     repo,
