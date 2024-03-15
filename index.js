@@ -100,6 +100,8 @@ const ownerToSheetPartition = (owner) => {
   return shards[key];
 };
 
+
+
 const reportATask = async (language, task, opts) => {
   const challenge = taskToChallengeName(task);
   const { token, server, sheetid } = opts;
@@ -110,12 +112,15 @@ const reportATask = async (language, task, opts) => {
   /* support for GitHub classroom repos */
   if (repo.startsWith('javascript-basics')) {
     const splitted = repo.split('-');
+    console.log({splitted});
 
     if (splitted.length === 3) {
       owner = splitted[2];
+      console.log({owner})
     } else {
       // remove the first two words from splitted
       const [, , ...rest] = splitted;
+      console.log('rest:', rest)
       owner = rest.join('-');
     }
   }
@@ -131,7 +136,7 @@ const reportATask = async (language, task, opts) => {
   const {
     data: { name },
   } = await axios.get(`https://api.github.com/users/${owner}`);
-  
+
   const data = {
     name,
     repo,
