@@ -23,7 +23,7 @@ inputs:
     required: true
     example: ghp_xxxxxxxxxxxxxxxxxxxx
 runs:
-  using: node22
+  using: node20
   main: dist/index.js
 branding:
   icon: bar-chart-2
