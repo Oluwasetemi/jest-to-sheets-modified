@@ -1,21 +1,30 @@
-name: Report Audit
-description: report jest test stats for one or more coding challenges
+name: Jest Test Reporter
+description: Report Jest test statistics to Google Sheets for coding challenges
+author: Oluwasetemi Ojo
 inputs:
   challenge:
-    description: the comma separated list of challenges or tasks to report on
+    description: Comma-separated list of challenges or tasks to report on
     required: true
+    example: task-1,task-2,task-3
   lang:
-    description: the programming language in use
+    description: Programming language in use (javascript, python, php)
     required: true
+    example: javascript
   server:
-    description: base API URL
+    description: Base API URL for the reporting service
     required: true
+    example: https://api.example.com
   sheetid:
-    description: the ID of the Google spreadsheet
+    description: Google Spreadsheet ID for storing results
     required: true
+    example: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
   token:
-    description: Auth token for the API call
+    description: Authentication token for API calls
     required: true
+    example: ghp_xxxxxxxxxxxxxxxxxxxx
 runs:
   using: node22
   main: dist/index.js
+branding:
+  icon: bar-chart-2
+  color: green

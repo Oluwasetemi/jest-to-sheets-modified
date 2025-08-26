@@ -1,0 +1,58 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2024-12-19
+
+### Added
+- 🚀 **Bun Integration**: Replaced @zeit/ncc with Bun for faster builds
+- ✨ **Enhanced Action Metadata**: Better descriptions, examples, and branding
+- 🎨 **Visual Branding**: Added icon (bar-chart-2) and green color theme
+- 📦 **ES Modules**: Updated to modern JavaScript format with `type: module`
+- 🔧 **Updated Dependencies**: Latest versions of all packages
+- 📝 **Improved Documentation**: Comprehensive README with usage examples
+- 🛠️ **Development Scripts**: Added lint, test, clean, and dev scripts
+- 🔄 **Automated Releases**: GitHub workflow for automated releases
+
+### Changed
+- **Build System**: Migrated from @zeit/ncc to Bun bundler
+- **Module System**: Converted to ES modules format
+- **Action Name**: Updated from "Report Audit" to "Jest Test Reporter"
+- **Input Descriptions**: Enhanced with examples and better clarity
+- **Package Version**: Bumped to v2.0.0
+
+### Breaking Changes
+- **Build Requirement**: Now requires Bun instead of @zeit/ncc
+- **Module Format**: Uses ES modules instead of CommonJS
+- **Action Reference**: Users should update to `@v2` tag
+
+### Migration Guide
+To upgrade from v1 to v2:
+
+1. Update your workflow to use the v2 tag:
+   ```yaml
+   - name: Jest Test Reporter
+     uses: Oluwasetemi/jest-to-sheets-modified@v2
+   ```
+
+2. Ensure you have Bun installed for local development:
+   ```bash
+   curl -fsSL https://bun.sh/install | bash
+   ```
+
+3. Update any custom build scripts to use Bun:
+   ```bash
+   bun run package  # instead of ncc build
+   ```
+
+## [1.0.0] - Initial Release
+
+### Added
+- Initial implementation of Jest test reporting to Google Sheets
+- Support for JavaScript, Python, and PHP projects
+- Multiple challenge/task reporting
+- GitHub Classroom repository support
+- Test attempt tracking

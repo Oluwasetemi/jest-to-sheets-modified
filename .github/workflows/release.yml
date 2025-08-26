@@ -1,0 +1,70 @@
+name: Release Action
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build action
+        run: bun run package
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## What's Changed
+            
+            ### v2.0.0
+            - 🚀 Migrated from @zeit/ncc to Bun for faster builds
+            - ✨ Enhanced action metadata with better descriptions and examples
+            - 🎨 Added branding with icon and color
+            - 📦 Updated to ES modules (type: module)
+            - 🔧 Updated dependencies to latest versions
+            - 📝 Improved documentation and input descriptions
+            
+            ### Breaking Changes
+            - Requires Bun for building (replaces @zeit/ncc)
+            - Updated to ES modules format
+            
+            ### Usage
+            ```yaml
+            - name: Jest Test Reporter
+              uses: Oluwasetemi/jest-to-sheets-modified@v2
+              with:
+                challenge: task-1,task-2
+                lang: javascript
+                server: ${{ secrets.API_SERVER }}
+                sheetid: ${{ secrets.SHEET_ID }}
+                token: ${{ secrets.API_TOKEN }}
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/index.js
+          asset_name: index.js
+          asset_content_type: application/javascript

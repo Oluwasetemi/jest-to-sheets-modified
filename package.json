@@ -1,7 +1,7 @@
 {
   "name": "jest-to-sheets-modified",
   "type": "module",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": {
     "name": "Oluwasetemi Ojo",
     "email": "setemiojo@gmail.com",
@@ -12,7 +12,13 @@
   "main": "index.js",
   "scripts": {
     "package": "bun build index.js --minify --outdir dist --target node",
-    "build": "esbuild index.js --bundle --minify --platform=node --outfile=dist/index.js"
+    "build": "esbuild index.js --bundle --minify --platform=node --outfile=dist/index.js",
+    "dev": "bun run package && node dist/index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "echo \"No tests specified\" && exit 0",
+    "clean": "rm -rf dist",
+    "prepackage": "bun run clean"
   },
   "dependencies": {
     "@actions/core": "^1.11.1",
