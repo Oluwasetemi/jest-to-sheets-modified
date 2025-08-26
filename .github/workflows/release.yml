@@ -27,41 +27,12 @@ jobs:
       - name: Build action
         run: bun run package
 
-      - name: Create Release
-        uses: elgohr/Github-Release-Action@v5
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          title: |
-            ## What's Changed
-
-            ### v2.0.0
-            - 🚀 Migrated from @zeit/ncc to Bun for faster builds
-            - ✨ Enhanced action metadata with better descriptions and examples
-            - 🎨 Added branding with icon and color
-            - 📦 Updated to ES modules (type: module)
-            - 🔧 Updated dependencies to latest versions
-            - 📝 Improved documentation and input descriptions
-
-            ### Breaking Changes
-            - Requires Bun for building (replaces @zeit/ncc)
-            - Updated to ES modules format
-
-            ### Usage
-            ```yaml
-            - name: Jest Test Reporter
-              uses: Oluwasetemi/jest-to-sheets-modified@v2
-              with:
-                challenge: task-1,task-2
-                lang: javascript
-                server: ${{ secrets.API_SERVER }}
-                sheetid: ${{ secrets.SHEET_ID }}
-                token: ${{ secrets.API_TOKEN }}
-            ```
-
-      - name: Upload Release Assets
+      - name: Create Release and Upload Assets
         run: |
-          gh release upload ${{ github.ref_name }} \
+          # Create release with assets
+          gh release create ${{ github.ref_name }} \
+            --title "Release ${{ github.ref_name }}" \
+            --notes-file CHANGELOG.md \
             ./dist/index.js \
             --repo ${{ github.repository }}
         env:
