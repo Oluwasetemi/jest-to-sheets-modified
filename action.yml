@@ -1,21 +1,21 @@
-name: 'Report Jest Audit'
-description: 'report jest test stats for one or more coding challenges'
+name: Report Audit
+description: report jest test stats for one or more coding challenges
 inputs:
   challenge:
-    description: 'the comma separated list of challenges or tasks to report on'
+    description: the comma separated list of challenges or tasks to report on
     required: true
   lang:
-    description: 'the programming language in use'
+    description: the programming language in use
     required: true
-  server:  
-    description: 'base API URL'
+  server:
+    description: base API URL
     required: true
-  sheetid:  
-    description: 'the ID of the Google spreadsheet'
+  sheetid:
+    description: the ID of the Google spreadsheet
     required: true
-  token:  
-    description: 'Auth token for the API call'
+  token:
+    description: Auth token for the API call
     required: true
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: node22
+  main: dist/index.js
