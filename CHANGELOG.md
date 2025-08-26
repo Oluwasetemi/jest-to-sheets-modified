@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2024-12-19
+
+### Fixed
+- **Node.js Compatibility**: Fixed action to use supported `node20` instead of unsupported `node22`
+- **Runtime Support**: Action now works properly in GitHub Actions environment
+
+## [2.1.0] - 2024-12-19
+
+### Changed
+- **Single Sheet Storage**: Replaced sharded sheet system with single `month1` sheet
+- **Simplified Data Management**: All test results now stored in one location
+- **Removed Sharding Logic**: Eliminated complex partitioning based on owner names
+
+### Removed
+- **Sharding System**: Removed `alphabets` array and `shards` object
+- **Partitioning Function**: Removed `ownerToSheetPartition()` function
+- **Complex Logic**: Simplified sheet selection to use `getSheetName()` function
+
 ## [2.0.0] - 2024-12-19
 
 ### Added
