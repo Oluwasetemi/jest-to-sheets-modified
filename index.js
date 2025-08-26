@@ -50,56 +50,12 @@ function taskToChallengeName(t) {
   return `Challenge-0${n}`
 }
 
-const alphabets = [
-  'a',
-  'b',
-  'c',
-  'd',
-  'e',
-  'f',
-  'g',
-  'h',
-  'i',
-  'j',
-  'k',
-  'l',
-  'm',
-  'n',
-  'o',
-  'p',
-  'q',
-  'r',
-  's',
-  't',
-  'u',
-  'v',
-  'w',
-  'x',
-  'y',
-  'z',
-]
-
-const shards = {
-  '0-4': 'A-E',
-  '5-9': 'F-J',
-  '10-14': 'K-O',
-  '15-19': 'P-T',
-  '20-25': 'U-Z',
-}
-
-function ownerToSheetPartition(owner) {
-  const initial = owner.charAt(0).toLowerCase()
-
-  let index = alphabets.indexOf(initial)
-  if (index === -1)
-    index = 25
-
-  const key = Object.keys(shards).find((k) => {
-    const [start, end] = k.split('-')
-    return index >= Number.parseInt(start, 10) && index <= Number.parseInt(end, 10)
-  })
-
-  return shards[key]
+/**
+ * Returns the sheet name for storing all data
+ * @returns {string} The sheet name
+ */
+function getSheetName() {
+  return 'month1'
 }
 
 async function reportATask(language, task, opts) {
@@ -127,7 +83,7 @@ async function reportATask(language, task, opts) {
   }
 
   const { repository, pusher } = context.payload
-  const sheet = ownerToSheetPartition(owner)
+  const sheet = getSheetName()
 
   // dont send data for skipped tests
   countAllTests += stats.tests
