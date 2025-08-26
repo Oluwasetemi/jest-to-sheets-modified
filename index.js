@@ -61,9 +61,11 @@ function getSheetName() {
 async function reportATask(language, task, opts) {
   const challenge = taskToChallengeName(task)
   const { token, server, sheetid } = opts
+  console.log({ token, server, sheetid })
   const stats = await getStatsFor(language, task)
 
   let { repo, owner } = context.repo
+  console.log({ repo, owner })
 
   /* support for GitHub classroom repos */
   if (repo.startsWith('javascript-basics')) {
