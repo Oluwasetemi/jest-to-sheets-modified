@@ -6,6 +6,7 @@ import axios from 'axios'
 import fileExists from 'fs.promises.exists'
 
 let countAllTests = 0
+let attempts = 0
 
 async function getStatsFor(lang, task) {
   const file = `${process.cwd()}/audits/${task}/${task}.json`
@@ -52,10 +53,8 @@ function taskToChallengeName(t) {
 
 
 
-async function reportATask(language, task, opts) {
+async function collectTaskData(language, task) {
   const challenge = taskToChallengeName(task)
-  const { token, server, sheetid } = opts
-  console.log({ token, server, sheetid })
   const stats = await getStatsFor(language, task)
 
   let { repo, owner } = context.repo
@@ -83,7 +82,7 @@ async function reportATask(language, task, opts) {
   // dont send data for skipped tests
   countAllTests += stats.tests
   if (stats.tests <= 0)
-    return
+    return null
 
   const {
     data: { name },
@@ -91,7 +90,8 @@ async function reportATask(language, task, opts) {
 
   console.log({ name })
 
-  const data = {
+  // Return task data instead of making API calls
+  return {
     name,
     repo,
     owner,
@@ -103,66 +103,6 @@ async function reportATask(language, task, opts) {
     since: new Date().toUTCString(),
     email: repository.owner.email || pusher.email,
   }
-  console.log({ data })
-
-  const sheet = 'month1'
-
-  // Use URL-encoded query parameters as per Sheetson API documentation
-  const queryParams = new URLSearchParams({
-    where: JSON.stringify({ repo }),
-    apiKey: token,
-    spreadsheetId: sheetid
-  })
-
-  const { data: existing } = await axios.get(
-    `${server}/${sheet}?${queryParams.toString()}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  ).catch(error => {
-    console.error('First API Error:', error.response?.data || error.message)
-    core.setFailed(error.message)
-  })
-
-  const found = existing?.results?.find(
-    e => e.repo === repo && e.task === challenge,
-  )
-  if (found) {
-    // update the record and exit this function
-    data.attempts = Number.parseInt(found.attempts, 10) + 1
-    
-    const updateParams = new URLSearchParams({
-      apiKey: token,
-      spreadsheetId: sheetid
-    })
-    
-    await axios.put(`${server}/${sheet}/${found.rowIndex}?${updateParams.toString()}`, data, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    return
-  }
-
-  data.attempts = 1
-  
-  const postParams = new URLSearchParams({
-    apiKey: token,
-    spreadsheetId: sheetid
-  })
-  
-  await axios.post(`${server}/${sheet}?${postParams.toString()}`, data, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  }).catch(error => {
-    console.error('API Error:', error.response?.data || error.message)
-    console.error('Status:', error.response?.status)
-    console.error('Headers:', error.response?.headers)
-    core.setFailed(error.message)
-  })
 }
 
 async function run() {
@@ -174,11 +114,13 @@ async function run() {
 
     const allTasks = core.getInput('challenge').split(/;\s*/)
 
-    await allTasks.reduce(async (previous, task) => {
-      return previous.then(() =>
-        reportATask(language, task, { token, server, sheetid }),
-      )
-    }, Promise.resolve())
+    // Collect all task data first
+    const taskDataPromises = allTasks.map(task =>
+      collectTaskData(language, task)
+    )
+
+    const taskDataResults = await Promise.all(taskDataPromises)
+    const validTaskData = taskDataResults.filter(data => data !== null)
 
     // Flag it if no tests ran at all
     if (countAllTests === 0) {
@@ -186,6 +128,91 @@ async function run() {
         'Unless you are window shopping here, please review the instructions carefully',
       )
       core.setFailed('All tests were skipped!!')
+    }
+
+    if (validTaskData.length === 0) {
+      return
+    }
+
+    // Aggregate data for the repo as a single record
+    const firstTask = validTaskData[0]
+    const aggregatedData = {
+      name: firstTask.name,
+      repo: firstTask.repo,
+      owner: firstTask.owner,
+      language: firstTask.language,
+      url: firstTask.url,
+      source: firstTask.source,
+      since: firstTask.since,
+      email: firstTask.email,
+      // Combine all tasks
+      task: validTaskData.map(t => t.task).join(';'),
+      // Sum up all tests and passed tests
+      tests: validTaskData.reduce((sum, t) => sum + t.tests, 0),
+      passed: validTaskData.reduce((sum, t) => sum + t.passed, 0),
+      attempts: attempts + 1
+    }
+
+    console.log('Aggregated data:', aggregatedData)
+
+    // Check if repo already exists
+    const sheet = 'month1'
+    const queryParams = new URLSearchParams({
+      where: `{ "repo": "${firstTask.repo}" }`,
+      apiKey: token,
+      spreadsheetId: sheetid
+    })
+
+    const { data: existing } = await axios.get(
+      `${server}/${sheet}?${queryParams.toString()}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    ).catch(error => {
+      console.error('GET API Error:', error.response?.data || error.message)
+      core.setFailed(error.message)
+    })
+
+    const found = existing?.results?.find(
+      e => e.repo === firstTask.repo,
+    )
+
+    if (found) {
+      // Update existing record
+      aggregatedData.attempts = Number.parseInt(found.attempts, 10) + attempts + 1
+
+      const updateParams = new URLSearchParams({
+        apiKey: token,
+        spreadsheetId: sheetid
+      })
+
+      await axios.put(`${server}/${sheet}/${found.rowIndex}?${updateParams.toString()}`, aggregatedData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).catch(error => {
+        console.error('Update API Error:', error.response?.data || error.message)
+        throw error
+      })
+    } else {
+      // Create new record
+      const postParams = new URLSearchParams({
+        apiKey: token,
+        spreadsheetId: sheetid
+      })
+
+      await axios.post(`${server}/${sheet}?${postParams.toString()}`, aggregatedData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).catch(error => {
+        console.error('POST API Error:', error.response?.data || error.message)
+        console.error('Status:', error.response?.status)
+        console.error('Headers:', error.response?.headers)
+        core.setFailed(error.message)
+      })
     }
   }
   catch (error) {
