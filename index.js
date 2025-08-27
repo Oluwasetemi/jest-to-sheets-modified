@@ -184,7 +184,7 @@ async function run() {
     console.log('Query params:', queryParams.toString())
 
     const { data: existing } = await axios.get(
-      `${server}/${sheet}?where={"repo": "${firstTask.repo}"}`,
+      `${server}/${sheet}?where={"repo": "${firstTask.repo}", "owner": "${firstTask.owner}"}`,
       {
         headers: {
           'Content-Type': 'application/json',
