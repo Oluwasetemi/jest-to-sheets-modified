@@ -119,6 +119,7 @@ async function collectTaskData(language, task) {
     source: 'gha-jest-tests',
     since: new Date().toUTCString(),
     email: repository.owner.email || pusher.email,
+    attempts: attempts + 1
   }
 }
 
@@ -168,7 +169,7 @@ async function run() {
       // Sum up all tests and passed tests
       tests: validTaskData.reduce((sum, t) => sum + t.tests, 0),
       passed: validTaskData.reduce((sum, t) => sum + t.passed, 0),
-      attempts: attempts + 1
+      attempts: firstTask.attempts
     }
 
     console.log('Aggregated data:', aggregatedData)
@@ -180,6 +181,9 @@ async function run() {
       spreadsheetId: sheetid
     })
 
+    console.log('Query URL:', `${server}/${sheet}?${queryParams.toString()}`)
+    console.log('Query params:', queryParams.toString())
+    
     const { data: existing } = await axios.get(
       `${server}/${sheet}?${queryParams.toString()}`,
       {
@@ -189,14 +193,33 @@ async function run() {
       },
     ).catch(error => {
       console.error('GET API Error:', error.response?.data || error.message)
+      console.error('GET API Status:', error.response?.status)
+      console.error('GET API Headers:', error.response?.headers)
       core.setFailed(error.message)
     })
 
+    console.log('API Response - existing:', existing)
+    console.log('API Response type:', typeof existing)
+    console.log('API Response keys:', existing ? Object.keys(existing) : 'null/undefined')
+
+    console.log('Searching for repo:', firstTask.repo)
+    console.log('Available results:', existing?.results?.length || 0)
+    console.log('Results array:', existing?.results)
+    
     const found = existing?.results?.find(
       e => e.repo === firstTask.repo,
     )
 
+    console.log('Found record:', found)
+    console.log('Found record type:', typeof found)
+    console.log('Found record keys:', found ? Object.keys(found) : 'null/undefined')
+
     if (found) {
+      console.log('Updating existing record')
+      console.log('Current attempts in found:', found.attempts)
+      console.log('Global attempts:', attempts)
+      console.log('Calculated new attempts:', Number.parseInt(found.attempts, 10) + attempts + 1)
+      
       // Update existing record
       aggregatedData.attempts = Number.parseInt(found.attempts, 10) + attempts + 1
 
@@ -214,6 +237,7 @@ async function run() {
         throw error
       })
     } else {
+      console.log('Creating new record - no existing record found')
       // Create new record
       const postParams = new URLSearchParams({
         apiKey: token,
