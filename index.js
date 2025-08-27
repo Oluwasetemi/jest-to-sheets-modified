@@ -6,7 +6,6 @@ import axios from 'axios'
 import fileExists from 'fs.promises.exists'
 
 let countAllTests = 0
-let attempts = 0
 
 async function getStatsFor(lang, task) {
   const file = `${process.cwd()}/audits/${task}/${task}.json`
@@ -119,7 +118,7 @@ async function collectTaskData(language, task) {
     source: 'gha-jest-tests',
     since: new Date().toUTCString(),
     email: repository.owner.email || pusher.email,
-    attempts: attempts + 1
+    attempts: 1
   }
 }
 
@@ -169,7 +168,7 @@ async function run() {
       // Sum up all tests and passed tests
       tests: validTaskData.reduce((sum, t) => sum + t.tests, 0),
       passed: validTaskData.reduce((sum, t) => sum + t.passed, 0),
-      attempts: firstTask.attempts
+      attempts: 1
     }
 
     console.log('Aggregated data:', aggregatedData)
@@ -219,11 +218,10 @@ async function run() {
     if (found) {
       console.log('Updating existing record')
       console.log('Current attempts in found:', found.attempts)
-      console.log('Global attempts:', attempts)
-      console.log('Calculated new attempts:', Number.parseInt(found.attempts, 10) + attempts + 1)
+      console.log('Calculated new attempts:', Number.parseInt(found.attempts, 10) + 1)
 
       // Update existing record
-      aggregatedData.attempts = Number.parseInt(found.attempts, 10) + attempts + 1
+      aggregatedData.attempts = Number.parseInt(found.attempts, 10) + 1
 
       const updateParams = new URLSearchParams({
         apiKey: token,
