@@ -50,13 +50,7 @@ function taskToChallengeName(t) {
   return `Challenge-0${n}`
 }
 
-/**
- * Returns the sheet name for storing all data
- * @returns {string} The sheet name
- */
-function getSheetName() {
-  return 'month1'
-}
+
 
 async function reportATask(language, task, opts) {
   const challenge = taskToChallengeName(task)
@@ -85,7 +79,6 @@ async function reportATask(language, task, opts) {
   }
 
   const { repository, pusher } = context.payload
-  const sheet = getSheetName()
 
   // dont send data for skipped tests
   countAllTests += stats.tests
@@ -108,6 +101,7 @@ async function reportATask(language, task, opts) {
     since: new Date().toUTCString(),
     email: repository.owner.email || pusher.email,
   }
+  console.log(data)
 
   const apiHeaders = {
     'X-Spreadsheet-Id': `${sheetid}`,
@@ -115,29 +109,38 @@ async function reportATask(language, task, opts) {
     'Content-Type': 'application/json',
   }
 
-  const { data: existing } = await axios.get(
-    `${server}/${sheet}?where={'repo':'${repo}'}`,
-    {
-      headers: apiHeaders,
-    },
-  )
+  try {
+    const sheet = 'month1'
 
-  const found = existing?.results?.find(
-    e => e.repo === repo && e.task === challenge,
-  )
-  if (found) {
-    // update the record and exit this function
-    data.attempts = Number.parseInt(found.attempts, 10) + 1
-    await axios.put(`${server}/${sheet}/${found.rowIndex}`, data, {
+    const { data: existing } = await axios.get(
+      `${server}/${sheet}?where={'repo':'${repo}'}`,
+      {
+        headers: apiHeaders,
+      },
+    )
+
+    const found = existing?.results?.find(
+      e => e.repo === repo && e.task === challenge,
+    )
+    if (found) {
+      // update the record and exit this function
+      data.attempts = Number.parseInt(found.attempts, 10) + 1
+      await axios.put(`${server}/${found.rowIndex}`, data, {
+        headers: apiHeaders,
+      })
+      return
+    }
+
+    data.attempts = 1
+    await axios.post(`${server}/month1`, data, {
       headers: apiHeaders,
     })
-    return
+  } catch (error) {
+    console.error('API Error:', error.response?.data || error.message)
+    console.error('Status:', error.response?.status)
+    console.error('Headers:', error.response?.headers)
+    throw error
   }
-
-  data.attempts = 1
-  await axios.post(`${server}/${sheet}`, data, {
-    headers: apiHeaders,
-  })
 }
 
 async function run() {
