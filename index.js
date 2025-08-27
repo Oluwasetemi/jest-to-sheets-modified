@@ -105,18 +105,21 @@ async function reportATask(language, task, opts) {
   }
   console.log({ data })
 
-  const apiHeaders = {
-    'X-Spreadsheet-Id': `${sheetid}`,
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  }
-
   const sheet = 'month1'
 
+  // Use URL-encoded query parameters as per Sheetson API documentation
+  const queryParams = new URLSearchParams({
+    where: JSON.stringify({ repo }),
+    apiKey: token,
+    spreadsheetId: sheetid
+  })
+
   const { data: existing } = await axios.get(
-    `${server}/${sheet}?where={'repo':'${repo}'}`,
+    `${server}/${sheet}?${queryParams.toString()}`,
     {
-      headers: apiHeaders,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
   ).catch(error => {
     console.error('First API Error:', error.response?.data || error.message)
@@ -129,15 +132,31 @@ async function reportATask(language, task, opts) {
   if (found) {
     // update the record and exit this function
     data.attempts = Number.parseInt(found.attempts, 10) + 1
-    await axios.put(`${server}/${found.rowIndex}`, data, {
-      headers: apiHeaders,
+    
+    const updateParams = new URLSearchParams({
+      apiKey: token,
+      spreadsheetId: sheetid
+    })
+    
+    await axios.put(`${server}/${sheet}/${found.rowIndex}?${updateParams.toString()}`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
     return
   }
 
   data.attempts = 1
-  await axios.post(`${server}/month1`, data, {
-    headers: apiHeaders,
+  
+  const postParams = new URLSearchParams({
+    apiKey: token,
+    spreadsheetId: sheetid
+  })
+  
+  await axios.post(`${server}/${sheet}?${postParams.toString()}`, data, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
   }).catch(error => {
     console.error('API Error:', error.response?.data || error.message)
     console.error('Status:', error.response?.status)
