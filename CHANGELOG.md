@@ -5,7 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.5] - 2025-08-26
+## [2.1.5] - 2025-08-27
+
+### Added
+- **Enhanced Record Matching**: Added owner field to where clause for more precise record identification
+- **Comprehensive Debug Logging**: Added detailed logging for API responses and record matching
+- **Aggregated Repository Records**: Combined multiple tasks into single records per repository
+- **Task Combination**: Tasks now stored as `Challenge-01;Challenge-02;Challenge-03` format
+- **Proper Attempt Tracking**: Enhanced attempt counting with correct increment logic
+- **Single API Call Per Repo**: One record per repository instead of multiple records
+
+### Changed
+- **Where Clause Enhancement**: Now searches by both `repo` and `owner` for exact record matching
+- **Data Structure**: Moved from individual task records to aggregated repository records
+- **API Call Strategy**: Collect all task data first, then make single API call
+- **Test Calculation**: Sum of all tests and passed tests across all tasks
+- **Function Architecture**: Separated data collection from API operations
+- **Attempt Logic**: Fixed attempt calculation to properly increment existing records
+
+### Fixed
+- **Attempt Tracking**: Corrected attempt increment logic and removed unused global variable
+- **API Headers**: Added proper Authorization and X-Spreadsheet-Id headers
+- **Where Clause Format**: Fixed JSON format for API queries
+
+### Removed
+- **Individual Task Records**: No longer creates separate records for each task
+- **Multiple API Calls**: Eliminated multiple API calls per repository
+- **Unused Global Variables**: Removed unused attempts variable
 
 ### Added
 - **Aggregated Repository Records**: Combined multiple tasks into single records per repository
