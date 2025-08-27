@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.5] - 2025-08-26
+
+### Added
+- **Aggregated Repository Records**: Combined multiple tasks into single records per repository
+- **Task Combination**: Tasks now stored as `Challenge-01;Challenge-02;Challenge-03` format
+- **Proper Attempt Tracking**: Enhanced attempt counting with global attempts variable
+- **Single API Call Per Repo**: One record per repository instead of multiple records
+
+### Changed
+- **Data Structure**: Moved from individual task records to aggregated repository records
+- **API Call Strategy**: Collect all task data first, then make single API call
+- **Test Calculation**: Sum of all tests and passed tests across all tasks
+- **Function Architecture**: Separated data collection from API operations
+
+### Removed
+- **Individual Task Records**: No longer creates separate records for each task
+- **Multiple API Calls**: Eliminated multiple API calls per repository
+
 ## [2.1.4] - 2025-08-26
 
 ### Added
