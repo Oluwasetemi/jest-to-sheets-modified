@@ -89,6 +89,8 @@ async function reportATask(language, task, opts) {
     data: { name },
   } = await axios.get(`https://api.github.com/users/${owner}`)
 
+  console.log({ name })
+
   const data = {
     name,
     repo,
@@ -101,7 +103,7 @@ async function reportATask(language, task, opts) {
     since: new Date().toUTCString(),
     email: repository.owner.email || pusher.email,
   }
-  console.log(data)
+  console.log({ data })
 
   const apiHeaders = {
     'X-Spreadsheet-Id': `${sheetid}`,
@@ -109,38 +111,39 @@ async function reportATask(language, task, opts) {
     'Content-Type': 'application/json',
   }
 
-  try {
-    const sheet = 'month1'
+  const sheet = 'month1'
 
-    const { data: existing } = await axios.get(
-      `${server}/${sheet}?where={'repo':'${repo}'}`,
-      {
-        headers: apiHeaders,
-      },
-    )
+  const { data: existing } = await axios.get(
+    `${server}/${sheet}?where={'repo':'${repo}'}`,
+    {
+      headers: apiHeaders,
+    },
+  ).catch(error => {
+    console.error('First API Error:', error.response?.data || error.message)
+    core.setFailed(error.message)
+  })
 
-    const found = existing?.results?.find(
-      e => e.repo === repo && e.task === challenge,
-    )
-    if (found) {
-      // update the record and exit this function
-      data.attempts = Number.parseInt(found.attempts, 10) + 1
-      await axios.put(`${server}/${found.rowIndex}`, data, {
-        headers: apiHeaders,
-      })
-      return
-    }
-
-    data.attempts = 1
-    await axios.post(`${server}/month1`, data, {
+  const found = existing?.results?.find(
+    e => e.repo === repo && e.task === challenge,
+  )
+  if (found) {
+    // update the record and exit this function
+    data.attempts = Number.parseInt(found.attempts, 10) + 1
+    await axios.put(`${server}/${found.rowIndex}`, data, {
       headers: apiHeaders,
     })
-  } catch (error) {
+    return
+  }
+
+  data.attempts = 1
+  await axios.post(`${server}/month1`, data, {
+    headers: apiHeaders,
+  }).catch(error => {
     console.error('API Error:', error.response?.data || error.message)
     console.error('Status:', error.response?.status)
     console.error('Headers:', error.response?.headers)
-    throw error
-  }
+    core.setFailed(error.message)
+  })
 }
 
 async function run() {
