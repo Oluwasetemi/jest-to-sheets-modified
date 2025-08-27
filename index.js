@@ -183,12 +183,14 @@ async function run() {
 
     console.log('Query URL:', `${server}/${sheet}?${queryParams.toString()}`)
     console.log('Query params:', queryParams.toString())
-    
+
     const { data: existing } = await axios.get(
-      `${server}/${sheet}?${queryParams.toString()}`,
+      `${server}/${sheet}?where={"repo": "${firstTask.repo}"}`,
       {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'X-Spreadsheet-Id': sheetid
         },
       },
     ).catch(error => {
@@ -205,7 +207,7 @@ async function run() {
     console.log('Searching for repo:', firstTask.repo)
     console.log('Available results:', existing?.results?.length || 0)
     console.log('Results array:', existing?.results)
-    
+
     const found = existing?.results?.find(
       e => e.repo === firstTask.repo,
     )
@@ -219,7 +221,7 @@ async function run() {
       console.log('Current attempts in found:', found.attempts)
       console.log('Global attempts:', attempts)
       console.log('Calculated new attempts:', Number.parseInt(found.attempts, 10) + attempts + 1)
-      
+
       // Update existing record
       aggregatedData.attempts = Number.parseInt(found.attempts, 10) + attempts + 1
 
