@@ -51,6 +51,23 @@ function taskToChallengeName(t) {
   return `Challenge-0${n}`
 }
 
+/**
+ * Return the standard GitHub “web” URL for a repo.
+ *
+ * @param {string} apiUrl
+ *   Example: "https://api.github.com/repos/Oluwasetemi/try2"
+ * @returns {string}
+ *   Example: "https://github.com/repos/Oluwasetemi/try2"
+ *
+ * The function only tweaks the hostname – it doesn't touch the path.
+ * If the given URL already uses “github.com”, it is returned unchanged.
+ */
+function clearRepoUrl(url) {
+  // Make sure we only replace a leading “api.” part and
+  // keep the rest of the URL untouched.
+  return url.replace(/^https:\/\/api\.github\.com/, 'https://github.com');
+}
+
 
 
 async function collectTaskData(language, task) {
@@ -98,7 +115,7 @@ async function collectTaskData(language, task) {
     ...stats,
     language,
     task: challenge,
-    url: repository.url,
+    url: clearRepoUrl(repository.url),
     source: 'gha-jest-tests',
     since: new Date().toUTCString(),
     email: repository.owner.email || pusher.email,
@@ -111,6 +128,7 @@ async function run() {
     const language = core.getInput('lang')
     const server = core.getInput('server')
     const sheetid = core.getInput('sheetid')
+    const sheet = core.getInput('sheet')
 
     const allTasks = core.getInput('challenge').split(/;\s*/)
 
@@ -156,7 +174,6 @@ async function run() {
     console.log('Aggregated data:', aggregatedData)
 
     // Check if repo already exists
-    const sheet = 'month1'
     const queryParams = new URLSearchParams({
       where: `{ "repo": "${firstTask.repo}" }`,
       apiKey: token,

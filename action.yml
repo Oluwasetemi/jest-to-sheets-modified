@@ -1,5 +1,5 @@
-name: Jest Test Reporter
-description: Report Jest test statistics to Google Sheets for coding challenges
+name: Test Results Reporter
+description: Report test statistics to Google Sheets for coding challenges
 author: Oluwasetemi Ojo
 inputs:
   challenge:
@@ -11,7 +11,7 @@ inputs:
     required: true
     example: javascript
   server:
-    description: Base API URL for the reporting service
+    description: Base API URL for the reporting service(sheetson API base URL)
     required: true
     example: https://api.example.com
   sheetid:
@@ -21,7 +21,11 @@ inputs:
   token:
     description: Authentication token for API calls
     required: true
-    example: ghp_xxxxxxxxxxxxxxxxxxxx
+    example: xxxxxxxxxxxxxxxxxxxx
+  sheet:
+    description: Google Spreadsheet name for storing results(ensure the sheet is created in the spreadsheet and contains the column names you are posting to - exactly matching the column names in the spreadsheet)
+    required: true
+    example: month1
 runs:
   using: node20
   main: dist/index.js
